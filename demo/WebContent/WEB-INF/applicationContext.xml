@@ -24,7 +24,8 @@
 		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<!-- Package in which our annotated Entity classes are defined -->
-		<property name="packagesToScan" value="com.project.mein.demo.entity" />
+		<property name="packagesToScan"
+			value="com.project.mein.entity,com.project.mein.dao.query" />
 		<property name="hibernateProperties">
 			<value>hibernate.show_sql=true</value>
 		</property>

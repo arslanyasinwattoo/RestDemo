@@ -1,17 +1,24 @@
 package com.project.mein.entity;
 
+import static javax.persistence.GenerationType.IDENTITY;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "languages", catalog = "srd")
 public class Languages implements java.io.Serializable {
-	private int languagesId;
+	private Integer languagesId;
 	private String name;
 	private int number;
 	private Repository repository;
@@ -19,7 +26,14 @@ public class Languages implements java.io.Serializable {
 	public Languages() {
 	}
 
-	public Languages(int languageId, String name, int number,
+	public Languages(Integer languagesId, String name, int number) {
+		super();
+		this.languagesId = languagesId;
+		this.name = name;
+		this.number = number;
+	}
+
+	public Languages(Integer languageId, String name, int number,
 			Repository repository) {
 		this.languagesId = languageId;
 		this.name = name;
@@ -28,12 +42,13 @@ public class Languages implements java.io.Serializable {
 	}
 
 	@Id
+	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "languages_id", unique = true, nullable = false)
-	public int getLanguagesId() {
+	public Integer getLanguagesId() {
 		return languagesId;
 	}
 
-	public void setLanguagesId(int languagesId) {
+	public void setLanguagesId(Integer languagesId) {
 		this.languagesId = languagesId;
 	}
 
@@ -46,7 +61,7 @@ public class Languages implements java.io.Serializable {
 		this.name = name;
 	}
 
-	@Column(name = "name", nullable = true)
+	@Column(name = "number", nullable = true)
 	public int getNumber() {
 		return number;
 	}
@@ -55,6 +70,7 @@ public class Languages implements java.io.Serializable {
 		this.number = number;
 	}
 
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "repository_id", nullable = false)
 	public Repository getRepository() {

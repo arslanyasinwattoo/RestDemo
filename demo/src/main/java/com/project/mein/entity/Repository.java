@@ -1,21 +1,28 @@
 package com.project.mein.entity;
 
+import static javax.persistence.GenerationType.IDENTITY;
+
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "repository", catalog = "srd")
 public class Repository implements java.io.Serializable {
-	private int repository_Id;
+	private Integer repository_Id;
 	private String name;
 	private String url;
 	private String description;
@@ -25,7 +32,7 @@ public class Repository implements java.io.Serializable {
 	public Repository() {
 	}
 
-	public Repository(int repository_Id, String name, String url,
+	public Repository(Integer repository_Id, String name, String url,
 			String description, User user) {
 		super();
 		this.repository_Id = repository_Id;
@@ -35,7 +42,7 @@ public class Repository implements java.io.Serializable {
 		this.user = user;
 	}
 
-	public Repository(int repository_Id, String name, String url,
+	public Repository(Integer repository_Id, String name, String url,
 			String description, User user, Set<Languages> languages) {
 		super();
 		this.repository_Id = repository_Id;
@@ -47,12 +54,13 @@ public class Repository implements java.io.Serializable {
 	}
 
 	@Id
+	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "repository_id", unique = true, nullable = false)
-	public int getRepository_Id() {
+	public Integer getRepository_Id() {
 		return repository_Id;
 	}
 
-	public void setRepository_Id(int repository_Id) {
+	public void setRepository_Id(Integer repository_Id) {
 		this.repository_Id = repository_Id;
 	}
 
@@ -83,6 +91,7 @@ public class Repository implements java.io.Serializable {
 		this.description = description;
 	}
 
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	public User getUser() {
@@ -93,6 +102,7 @@ public class Repository implements java.io.Serializable {
 		this.user = user;
 	}
 
+	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "repository")
 	public Set<Languages> getLanguages() {
 		return languages;

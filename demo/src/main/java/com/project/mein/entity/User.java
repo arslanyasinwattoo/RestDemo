@@ -1,11 +1,14 @@
 package com.project.mein.entity;
 
+import static javax.persistence.GenerationType.IDENTITY;
+
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -17,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "user", catalog = "srd")
 public class User implements java.io.Serializable {
-	private int userId;
+	private Integer userId;
 	private String username;
 	private String name;
 	private String location;
@@ -30,7 +33,7 @@ public class User implements java.io.Serializable {
 
 	}
 
-	public User(int userId, String username, String name, String location,
+	public User(Integer userId, String username, String name, String location,
 			String company, String email, String bio) {
 		super();
 		this.userId = userId;
@@ -42,7 +45,7 @@ public class User implements java.io.Serializable {
 		this.bio = bio;
 	}
 
-	public User(int userId, String username, String name, String location,
+	public User(Integer userId, String username, String name, String location,
 			String company, String email, String bio,
 			Set<Repository> repositories) {
 		this.userId = userId;
@@ -56,12 +59,13 @@ public class User implements java.io.Serializable {
 	}
 
 	@Id
+	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "user_id", unique = true, nullable = false)
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 
