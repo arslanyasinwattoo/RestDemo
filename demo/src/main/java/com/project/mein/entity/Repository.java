@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "repository", catalog = "srd")
 public class Repository implements java.io.Serializable {
-	private Integer repository_Id;
+	private Integer repositoryId;
 	private String name;
 	private String url;
 	private String description;
@@ -32,20 +32,20 @@ public class Repository implements java.io.Serializable {
 	public Repository() {
 	}
 
-	public Repository(Integer repository_Id, String name, String url,
+	public Repository(Integer repositoryId, String name, String url,
 			String description, User user) {
 		super();
-		this.repository_Id = repository_Id;
+		this.repositoryId = repositoryId;
 		this.name = name;
 		this.url = url;
 		this.description = description;
 		this.user = user;
 	}
 
-	public Repository(Integer repository_Id, String name, String url,
+	public Repository(Integer repositoryId, String name, String url,
 			String description, User user, Set<Languages> languages) {
 		super();
-		this.repository_Id = repository_Id;
+		this.repositoryId = repositoryId;
 		this.name = name;
 		this.url = url;
 		this.description = description;
@@ -56,12 +56,12 @@ public class Repository implements java.io.Serializable {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "repository_id", unique = true, nullable = false)
-	public Integer getRepository_Id() {
-		return repository_Id;
+	public Integer getRepositoryId() {
+		return repositoryId;
 	}
 
-	public void setRepository_Id(Integer repository_Id) {
-		this.repository_Id = repository_Id;
+	public void setRepositoryId(Integer repositoryId) {
+		this.repositoryId = repositoryId;
 	}
 
 	@Column(name = "name", nullable = true, length = 45)

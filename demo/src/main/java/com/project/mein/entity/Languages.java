@@ -20,20 +20,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Languages implements java.io.Serializable {
 	private Integer languagesId;
 	private String name;
-	private int number;
+	private Double number;
 	private Repository repository;
 
 	public Languages() {
 	}
 
-	public Languages(Integer languagesId, String name, int number) {
+	public Languages(Integer languagesId, String name, Double number) {
 		super();
 		this.languagesId = languagesId;
 		this.name = name;
 		this.number = number;
 	}
 
-	public Languages(Integer languageId, String name, int number,
+	public Languages(Integer languageId, String name, Double number,
 			Repository repository) {
 		this.languagesId = languageId;
 		this.name = name;
@@ -41,6 +41,7 @@ public class Languages implements java.io.Serializable {
 		this.repository = repository;
 	}
 
+	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "languages_id", unique = true, nullable = false)
@@ -62,11 +63,11 @@ public class Languages implements java.io.Serializable {
 	}
 
 	@Column(name = "number", nullable = true)
-	public int getNumber() {
+	public Double getNumber() {
 		return number;
 	}
 
-	public void setNumber(int number) {
+	public void setNumber(Double number) {
 		this.number = number;
 	}
 

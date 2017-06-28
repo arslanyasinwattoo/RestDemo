@@ -1,11 +1,11 @@
 package com.project.mein.controller;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.mein.entity.Languages;
@@ -34,16 +32,16 @@ import com.project.mein.entity.User;
 import com.project.mein.service.userService;
 
 @Controller
-public class TestController {
+public class ImportController {
 
 	@Autowired
 	private userService userService;
 	private static final Logger logger = LoggerFactory
-			.getLogger(TestController.class);
+			.getLogger(ImportController.class);
 
 	@RequestMapping(value = "/api/import/{username}", method = RequestMethod.GET, headers = "Accept=application/json")
 	@ResponseBody
-	public ResponseEntity<Object> hello(
+	public ResponseEntity<Object> importUser(
 			@PathVariable("username") String username) throws Exception {
 		logger.info("calling:/api/hello");
 		logger.debug("welcome() is executed, value {}", "arslan");
@@ -60,78 +58,100 @@ public class TestController {
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 		HttpEntity<String> entity = new HttpEntity<String>("parameters",
 				headers);
+		// calling github rest endpoint for users
 		ResponseEntity<String> result = restTemplate.exchange(uri,
 				HttpMethod.GET, entity, String.class);
 		ObjectMapper mapper = new ObjectMapper();
 		User user = new User();
 		List<Repository> repository = new ArrayList<>();
-		// List<Languages> languages = new ArrayList<>();
-		// List<Repository> repository = new ArrayList<Repository>();
 
 		user = mapper.readValue(result.getBody(), User.class);
 		user.setUsername(username);
+		// checking if the user exists before
 		User user2 = userService.getUsersByName(user);
 		if (user2.getUserId() != null) {
 			user.setUserId(user2.getUserId());
-			System.out.println("user id testing advance" + user.getUserId());
+			// System.out.println("user id testing advance" + user.getUserId());
 		}
+		// if exists it updates else saves
 		userService.addUser(user);
-		user = userService.getUsersByName(user);
+		// user = userService.getUsersByName(user);
+		// calling github api endpoint for collecting all repository info of
+		// user
 		result = restTemplate.exchange(uriRepo, HttpMethod.GET, entity,
 				String.class);
 		repository = mapper.readValue(result.getBody(),
 				new TypeReference<List<Repository>>() {
 				});
+
+		// for loop for getting all languages from all the repos a user has
 		for (Repository repository2 : repository) {
+
 			repository2.setUser(user);
-			System.out.println(repository2.getName());
+			// System.out.println(repository2.getName());
 			String uriLang = "https://api.github.com/repos/"
 					+ repository2.getUser().getUsername() + "/"
 					+ repository2.getName() + "/languages";
+			// getting all languages of a repo
 			result = restTemplate.exchange(uriLang, HttpMethod.GET, entity,
 					String.class);
+			// checks if repository already exists
 			Repository repository3 = userService
 					.getRepositoryByUrl(repository2);
-			if (repository3.getRepository_Id() != null) {
-				repository2.setRepository_Id(repository3.getRepository_Id());
+			if (repository3.getRepositoryId() != null) {
+				repository2.setRepositoryId(repository3.getRepositoryId());
 			}
 			String description = repository2.getDescription();
-
+			// incase description is greater than 250
 			if (description != null) {
 				description = description.length() > 250 ? description
 						.substring(0, 249) : description;
 			}
 			repository2.setDescription(description);
+			// adds or updates the repositories
 			userService.addRepository(repository2);
 			repository2 = userService.getRepositoryByUrl(repository2);
-			System.out.println(repository2.getUrl());
+			// System.out.println(repository2.getUrl());
+			// for reading language data as their is no key and language name is
+			// the key itself
 			JsonFactory factory = new JsonFactory();
-
 			mapper = new ObjectMapper(factory);
 			JsonNode rootNode = mapper.readTree(result.getBody());
-
 			Iterator<Map.Entry<String, JsonNode>> fieldsIterator = rootNode
 					.fields();
 			while (fieldsIterator.hasNext()) {
 				Languages languages2 = new Languages();
-				Languages languages = new Languages();
+				List<Languages> list = new ArrayList<>();
 				languages2.setRepository(repository2);
-				if (repository2.getRepository_Id() != null) {
-
-					languages.setRepository(repository2);
-					languages = userService.getLanguageByRepoId(languages);
-
-				}
 				Map.Entry<String, JsonNode> field = fieldsIterator.next();
-				System.out.println("Key: " + field.getKey() + "\tValue:"
-						+ field.getValue());
+				// System.out.println("Key: " + field.getKey() + "\tValue:"
+				// + field.getValue());
 				languages2.setName(field.getKey());
-				languages2.setNumber(field.getValue().asInt());
-				if (languages.getLanguagesId() != null
-						&& languages.getName().equals(languages2.getName())) {
-					languages2.setLanguagesId(languages.getLanguagesId());
-				}
+				languages2.setNumber(field.getValue().asDouble());
+				if (repository2.getRepositoryId() != null) {
+					Languages languages = new Languages();
+					languages.setRepository(repository2);
+					languages.setName(languages2.getName());
+					// checking/calling id for the language based on repo id and
+					// name
 
+					list = userService.getLanguageByRepoId(languages);
+					// and checking if the language already exists in the db
+					if (list != null) {
+						for (Languages languages3 : list) {
+							// if exists extra check and than set id for
+							// updating instead of adding
+							if (languages3.getName().equals(
+									languages2.getName())) {
+								languages2.setLanguagesId(languages3
+										.getLanguagesId());
+
+							}
+						}
+
+					}
+				}
+				// inserting or updating based on the id
 				userService.addLanguages(languages2);
 			}
 		}

@@ -52,6 +52,11 @@ public class userService {
 		return repository;
 	}
 
+	public List<Repository> getRepositoryByUserId(Integer id) throws Exception {
+
+		return genericDao.findByNamedQuery("getRepositoryByUserId", id);
+	}
+
 	public List<Repository> getAllRepository() throws Exception {
 		// TODO Auto-generated method stub
 		return genericDao.findAll(Languages.class);
@@ -67,14 +72,22 @@ public class userService {
 		return genericDao.findAll(Languages.class);
 	}
 
-	public Languages getLanguageByRepoId(Languages languages) throws Exception {
-		List<Languages> list = genericDao.findByNamedQuery(
-				"getLanguageByRepoId", languages.getRepository()
-						.getRepository_Id());
-		for (Languages languages2 : list) {
-			languages = languages2;
-		}
-		return languages;
+	public List<Languages> getLanguageByRepoId(Languages languages)
+			throws Exception {
+
+		return genericDao.findByNamedQuery("getLanguageByRepoId", languages
+				.getRepository().getRepositoryId(), languages.getName());
+	}
+
+	public List<Languages> getLanguageByRepoId(Integer id) throws Exception {
+
+		return genericDao.findByNamedQuery("getLanguageByRepoId", id);
+	}
+
+	public List<Languages> getLanguageByUsername(String username)
+			throws Exception {
+
+		return genericDao.findByNamedQuery("getLanguageByUsername", username);
 	}
 
 }
