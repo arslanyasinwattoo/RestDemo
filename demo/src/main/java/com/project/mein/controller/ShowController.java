@@ -25,6 +25,30 @@ public class ShowController {
 	private static final Logger logger = LoggerFactory
 			.getLogger(ShowController.class);
 
+	@RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+	@ResponseBody
+	public String[] home() throws Exception {
+		logger.info("Instructions page");
+		logger.debug("debugging");
+		// logger.error("This is Error message", new Exception(
+		// "home page instructions"));
+		String[] instructions = {
+				"work flow and apis",
+				"/api/import/{username}",
+				"imports users from github.",
+				"saves or updates data in mysql from users,repositories and languages of repositories",
+				"/api/show/users",
+				"fetches all users from user table",
+				"/api/show/{id}/repos",
+				"fetches repositories based on user id",
+				"/api/show/{id}/lang",
+				"fetches languages of repository which belonged to a particular user",
+				"show languages used and percentage of contribution in the particular repository",
+				"/api/show/{username}",
+				"shows languages used and percentage of contribution in all therepositories" };
+		return instructions;
+	}
+
 	@RequestMapping(value = "/api/show/users", method = RequestMethod.GET, headers = "Accept=application/json")
 	@ResponseBody
 	public ResponseEntity<List<User>> showUsers() throws Exception {

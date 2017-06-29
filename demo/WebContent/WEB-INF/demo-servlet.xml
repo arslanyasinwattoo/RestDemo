@@ -13,7 +13,9 @@
 	<mvc:annotation-driven />
 
 	<!-- To resolve complete JSP path and extension -->
-	<!-- <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
-		<property name="prefix" value="/WEB-INF/jsp/" /> <property name="suffix" 
-		value=".jsp" /> </bean> -->
+<!-- 	<bean id="viewResolver" -->
+<!-- 		class="org.springframework.web.servlet.view.InternalResourceViewResolver"> -->
+<!-- 		<property name="prefix" value="/WEB-INF/jsp/" /> -->
+<!-- 		<property name="suffix" value=".jsp" /> -->
+<!-- 	</bean> -->
 </beans>
