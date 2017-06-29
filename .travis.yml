@@ -1,5 +1,4 @@
 language: java
 jdk: oraclejdk7
-script: mvn -f demo/pom.xml verify
-mvn test -B
-mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+       mvn test -B
+       mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
