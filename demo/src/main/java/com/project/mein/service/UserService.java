@@ -12,7 +12,7 @@ import com.project.mein.entity.Repository;
 import com.project.mein.entity.User;
 
 @Service
-public class userService {
+public class UserService {
 	@Autowired
 	private GenericDao genericDao;
 
