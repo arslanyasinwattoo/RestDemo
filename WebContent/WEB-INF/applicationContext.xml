@@ -18,7 +18,8 @@
 		<property name="username" value="root" />
 		<property name="password" value="03144214002" />
 	</bean>
-
+	<!-- mysql://mysql:3306/ for openshift password,username and dbname are 
+		same -->
 	<!-- Hibernate Configuration -->
 	<bean id="sessionFactory"
 		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
