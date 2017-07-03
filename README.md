@@ -21,12 +21,18 @@ change username and password in WEB-INF/applicationContext.xml
 run the project on tomcat 
 use postman or other tools for the app
 
+
 To run unit test localy use junit or maven plugin 
 on build push travis ci automaticly tests the repo and depolys it on heruko
 in case failure travis sends an email.
 	
 	Work Flow And Apis
-
+/
+instructions 
+when project is started in eclipse a pop up will appear which states download json object, you can cancel it. 
+it contains a list of api endpoints of the system in json format 
+note: when using browser or postman their will be no popup it will display json properly
+	
 /api/import/{username}
 
 Imports Users From Github. 

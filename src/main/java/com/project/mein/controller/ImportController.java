@@ -48,10 +48,6 @@ public class ImportController {
 		logger.debug("importUser() is executed, value {username:" + username
 				+ "}", "arslan");
 
-		logger.error("This is Error message", new Exception(
-				"Importing user data"));
-
-		// return new ResponseEntity<String>("testing 123", HttpStatus.OK);
 		final String uri = "https://api.github.com/users/" + username;
 		final String uriRepo = "https://api.github.com/users/" + username
 				+ "/repos";
@@ -68,121 +64,153 @@ public class ImportController {
 			logger.info("calling:api.github.com/users/{username}/repos");
 			logger.debug("showUsers()-> users/" + username
 					+ "/repos is executed ", "arslan");
-
 			ObjectMapper mapper = new ObjectMapper();
-			User user = new User();
-			List<Repository> repository = new ArrayList<>();
+			logger.debug(""
+					+ (mapper.readTree(result.getBody()).get("public_repos")));
+			int repo = mapper.readTree(result.getBody()).get("public_repos")
+					.asInt();
 
-			user = mapper.readValue(result.getBody(), User.class);
-			user.setUsername(username);
-			// handling bio limitations
-			user.setBio(user.getBio().length() > 250 ? user.getBio().substring(
-					0, 249) : user.getBio());
-			// checking if the user exists before
-			User user2 = userService.getUsersByName(user);
-			if (user2.getUserId() != null) {
-				user.setUserId(user2.getUserId());
-				// System.out.println("user id testing advance" +
-				// user.getUserId());
-			}
-			// if exists it updates else saves
-			userService.addUser(user);
-			// user = userService.getUsersByName(user);
-			// calling github api endpoint for collecting all repository info of
-			// user
-			result = restTemplate.exchange(uriRepo, HttpMethod.GET, entity,
-					String.class);
-			repository = mapper.readValue(result.getBody(),
-					new TypeReference<List<Repository>>() {
-					});
+			String test = result.getHeaders().get("X-RateLimit-Remaining")
+					.toString();
+			test = test.replaceAll("[\\[\\](){}]", "");
+			int limit = Integer.parseInt(test);
+			if (result.getBody() != null
+					&& result.getStatusCode() != HttpStatus.NOT_FOUND
+					&& repo > 0 && limit > 0) {
+				User user = new User();
+				List<Repository> repository = new ArrayList<>();
 
-			// for loop for getting all languages from all the repos a user has
-			for (Repository repository2 : repository) {
-
-				repository2.setUser(user);
-				String uriLang = "https://api.github.com/repos/"
-						+ repository2.getUser().getUsername() + "/"
-						+ repository2.getName() + "/languages";
-				// getting all languages of a repo
-
-				result = restTemplate.exchange(uriLang, HttpMethod.GET, entity,
+				user = mapper.readValue(result.getBody(), User.class);
+				user.setUsername(username);
+				// handling bio limitations
+				if (user.getBio() != null) {
+					user.setBio(user.getBio().length() > 250 ? user.getBio()
+							.substring(0, 249) : user.getBio());
+				}
+				// checking if the user exists before
+				User user2 = userService.getUsersByName(user);
+				if (user2 != null) {
+					user.setUserId(user2.getUserId());
+				}
+				// if exists it updates else saves
+				userService.addUser(user);
+				user = userService.getUsersByName(user);
+				// calling github api endpoint for collecting all repository
+				// info of
+				// user
+				result = restTemplate.exchange(uriRepo, HttpMethod.GET, entity,
 						String.class);
-				logger.info("calling:api.github.com/repos/{username}/{repo}/languages");
-				logger.debug("showUsers()-> repos/"
-						+ repository2.getUser().getUsername() + "/"
-						+ repository2.getName() + " is executed ", "arslan");
+				repository = mapper.readValue(result.getBody(),
+						new TypeReference<List<Repository>>() {
+						});
 
-				// checks if repository already exists
-				Repository repository3 = userService
-						.getRepositoryByUrl(repository2);
-				if (repository3.getRepositoryId() != null) {
-					repository2.setRepositoryId(repository3.getRepositoryId());
-				}
-				String description = repository2.getDescription();
-				// incase description is greater than 250
-				if (description != null) {
-					description = description.length() > 250 ? description
-							.substring(0, 249) : description;
-				}
-				repository2.setDescription(description);
-				// adds or updates the repositories
-				userService.addRepository(repository2);
-				repository2 = userService.getRepositoryByUrl(repository2);
-				// System.out.println(repository2.getUrl());
-				// for reading language data as their is no key and language
-				// name is
-				// the key itself
-				JsonFactory factory = new JsonFactory();
-				mapper = new ObjectMapper(factory);
-				JsonNode rootNode = mapper.readTree(result.getBody());
-				Iterator<Map.Entry<String, JsonNode>> fieldsIterator = rootNode
-						.fields();
-				while (fieldsIterator.hasNext()) {
-					Languages languages2 = new Languages();
-					List<Languages> list = new ArrayList<>();
-					languages2.setRepository(repository2);
-					Map.Entry<String, JsonNode> field = fieldsIterator.next();
-					// System.out.println("Key: " + field.getKey() + "\tValue:"
-					// + field.getValue());
-					languages2.setName(field.getKey());
-					languages2.setNumber(field.getValue().asDouble());
-					if (repository2.getRepositoryId() != null) {
-						Languages languages = new Languages();
-						languages.setRepository(repository2);
-						languages.setName(languages2.getName());
-						// checking/calling id for the language based on repo id
-						// and
-						// name
+				// for loop for getting all languages from all the repos a user
+				// has
+				for (Repository repository2 : repository) {
 
-						list = userService.getLanguageByRepoId(languages);
-						// and checking if the language already exists in the db
-						if (list != null) {
-							for (Languages languages3 : list) {
-								// if exists extra check and than set id for
-								// updating instead of adding
-								if (languages3.getName().equals(
-										languages2.getName())) {
-									languages2.setLanguagesId(languages3
-											.getLanguagesId());
+					repository2.setUser(user);
+					String uriLang = "https://api.github.com/repos/"
+							+ repository2.getUser().getUsername() + "/"
+							+ repository2.getName() + "/languages";
 
-								}
-							}
-
-						}
+					// checks if repository already exists
+					Repository repository3 = userService
+							.getRepositoryByUrl(repository2);
+					if (repository3.getRepositoryId() != null) {
+						repository2.setRepositoryId(repository3
+								.getRepositoryId());
 					}
-					// inserting or updating based on the id
-					userService.addLanguages(languages2);
+					String description = repository2.getDescription();
+					// incase description is greater than 250
+					if (description != null) {
+						description = description.length() > 250 ? description
+								.substring(0, 249) : description;
+					}
+					repository2.setDescription(description);
+					// adds or updates the repositories
+					userService.addRepository(repository2);
 
+					repository2 = userService.getRepositoryByUrl(repository2);
+					repository2.setUser(user2);
+					// getting all languages of a repo
+
+					result = restTemplate.exchange(uriLang, HttpMethod.GET,
+							entity, String.class);
+					logger.info("calling:api.github.com/repos/{username}/{repo}/languages");
+					logger.debug("showUsers()-> repos/"
+							+ repository2.getUser().getUsername() + "/"
+							+ repository2.getName() + " is executed ", "arslan");
+					// for reading language data as their is no key and language
+					// name is
+					// the key itself
+					JsonFactory factory = new JsonFactory();
+					mapper = new ObjectMapper(factory);
+					JsonNode rootNode = mapper.readTree(result.getBody());
+					Iterator<Map.Entry<String, JsonNode>> fieldsIterator = rootNode
+							.fields();
+					while (fieldsIterator.hasNext()) {
+						Languages languages2 = new Languages();
+						List<Languages> list = new ArrayList<>();
+						languages2.setRepository(repository2);
+						Map.Entry<String, JsonNode> field = fieldsIterator
+								.next();
+						languages2.setName(field.getKey());
+						languages2.setNumber(field.getValue().asDouble());
+						if (repository2.getRepositoryId() != null) {
+							Languages languages = new Languages();
+							languages.setRepository(repository2);
+							languages.setName(languages2.getName());
+							// checking/calling id for the language based on
+							// repo id
+							// and
+							// name
+
+							list = userService.getLanguageByRepoId(languages);
+							// and checking if the language already exists in
+							// the db
+							if (list != null) {
+								for (Languages languages3 : list) {
+									// if exists extra check and than set id for
+									// updating instead of adding
+									if (languages3.getName().equals(
+											languages2.getName())) {
+										languages2.setLanguagesId(languages3
+												.getLanguagesId());
+
+									}
+								}
+
+							}
+						}
+
+						// inserting or updating based on the id
+						userService.addLanguages(languages2);
+					}
+
+				}
+			} else {
+				// no repositories of the user so dont do anything and return
+				if (repo == 0) {
+					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+							"User found but no Repositories ");
+				}
+				if (limit == 0) {
+					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+							"Limit =0 try again tomorrow");
+
+				} else {
+					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+							"User not found on github");
 				}
 
 			}
-
 			logger.debug(result.getBody());
 		} catch (HttpStatusCodeException e) {
+			logger.error("This is Error message", e);
+
 			return ResponseEntity.status(e.getRawStatusCode()).body(null);
 		}
 		return ResponseEntity.status(HttpStatus.CREATED).body(
 				"User data has been saved");
 	}
-
 }

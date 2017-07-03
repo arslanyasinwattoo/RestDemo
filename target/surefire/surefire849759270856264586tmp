@@ -1,5 +1,5 @@
 #surefire
-#Fri Jun 30 01:59:36 CEST 2017
+#Mon Jul 03 07:07:40 CEST 2017
 dirscanner.0.params=C\:\\Users\\Arslanyasinwattoo\\git\\demo\\target\\test-classes|[**/Test*.java, **/*Test.java, **/*TestCase.java]|[**/*$*]
 enableAssertions=true
 testSuiteDefinitionTestSourceDirectory=C\:\\Users\\Arslanyasinwattoo\\git\\demo\\src\\test\\java

@@ -76,7 +76,7 @@ public class UserService {
 			throws Exception {
 
 		return genericDao.findByNamedQuery("getLanguageByRepoId", languages
-				.getRepository().getRepositoryId(), languages.getName());
+				.getRepository().getRepositoryId());
 	}
 
 	public List<Languages> getLanguageByRepoId(Integer id) throws Exception {
